@@ -12,10 +12,12 @@
     <div class="header-content">
       <h1 class="app-title">Miracle Jisok</h1>
       <div class="header-right">
+        <button id="exportBtn" class="export-btn" aria-label="Export PNG">Export PNG</button>
         <button id="aboutBtn" class="about-btn" aria-label="About">About</button>
         <span class="creator-id">@Aowu_x</span>
       </div>
     </div>
+    <div id="exportStatus" class="export-status" aria-live="polite" aria-atomic="true"></div>
   </header>
 
   <main class="main-content">
@@ -87,6 +89,14 @@
         
         <p>If unauthorized commercial use is found, public access to this game may be discontinued.</p>
       </div>
+    </div>
+  </div>
+
+  <!-- Mobile Export Action Bar -->
+  <div id="mobileExportBar" class="mobile-export-bar">
+    <div class="mobile-export-content">
+      <div id="mobileExportStatus" class="mobile-export-status" aria-live="polite" aria-atomic="true"></div>
+      <button id="mobileExportBtn" class="mobile-export-btn" aria-label="Export PNG">Export PNG</button>
     </div>
   </div>
 

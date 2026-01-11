@@ -39,6 +39,12 @@ const outfitPageInfo = document.getElementById("outfitPageInfo");
 // Get back to top button
 const backToTopBtn = document.getElementById("backToTop");
 
+// Get export buttons and status elements
+const exportBtn = document.getElementById("exportBtn");
+const mobileExportBtn = document.getElementById("mobileExportBtn");
+const exportStatus = document.getElementById("exportStatus");
+const mobileExportStatus = document.getElementById("mobileExportStatus");
+
 // Get modal elements (will be initialized in setupModal)
 let aboutBtn;
 let aboutModal;
@@ -71,6 +77,9 @@ window.addEventListener("DOMContentLoaded", function() {
   
   // Setup modal
   setupModal();
+  
+  // Setup export
+  setupExport();
 });
 
 // Back to Top functionality
@@ -392,4 +401,201 @@ function updateOutfitPagination() {
   outfitPageInfo.textContent = `Page ${outfitPage} of ${totalPages}`;
   outfitPrev.disabled = outfitPage === 1;
   outfitNext.disabled = outfitPage === totalPages;
+}
+
+// Export PNG functionality
+function setupExport() {
+  exportBtn.addEventListener("click", handleExport);
+  if (mobileExportBtn) {
+    mobileExportBtn.addEventListener("click", handleExport);
+  }
+}
+
+// Status message management
+let statusTimeout = null;
+
+function showExportStatus(message, type = "info") {
+  // Clear existing timeout
+  if (statusTimeout) {
+    clearTimeout(statusTimeout);
+  }
+  
+  // Update desktop status
+  if (exportStatus) {
+    exportStatus.textContent = message;
+    exportStatus.className = "export-status show";
+    if (type === "success") {
+      exportStatus.classList.add("success");
+    } else if (type === "error") {
+      exportStatus.classList.add("error");
+    }
+  }
+  
+  // Update mobile status
+  if (mobileExportStatus) {
+    mobileExportStatus.textContent = message;
+    mobileExportStatus.className = "mobile-export-status";
+    if (type === "success") {
+      mobileExportStatus.classList.add("success");
+    } else if (type === "error") {
+      mobileExportStatus.classList.add("error");
+    }
+  }
+  
+  // Auto-hide after 2 seconds
+  statusTimeout = setTimeout(() => {
+    hideExportStatus();
+  }, 2000);
+}
+
+function hideExportStatus() {
+  if (exportStatus) {
+    exportStatus.classList.remove("show");
+    setTimeout(() => {
+      exportStatus.textContent = "";
+      exportStatus.className = "export-status";
+    }, 300);
+  }
+  
+  if (mobileExportStatus) {
+    mobileExportStatus.textContent = "";
+    mobileExportStatus.className = "mobile-export-status";
+  }
+  
+  if (statusTimeout) {
+    clearTimeout(statusTimeout);
+    statusTimeout = null;
+  }
+}
+
+async function handleExport() {
+  // Check if all images are loaded
+  const images = [baseImg, hairImg, outfitImg];
+  if (guitarIdx !== null && guitarImg.src) images.push(guitarImg);
+  if (accIdx !== null && accImg.src) images.push(accImg);
+  
+  // Check if all required images are loaded
+  const allLoaded = images.every(img => {
+    if (!img.src) return false;
+    return img.complete && img.naturalWidth > 0 && img.naturalHeight > 0;
+  });
+  
+  if (!allLoaded) {
+    showExportStatus("Images are still loading. Please try again in a moment.", "error");
+    return;
+  }
+  
+  // Update button state
+  exportBtn.disabled = true;
+  if (mobileExportBtn) {
+    mobileExportBtn.disabled = true;
+  }
+  
+  // Show exporting status
+  showExportStatus("Exporting...", "info");
+  
+  try {
+    // Get base image dimensions
+    const width = baseImg.naturalWidth;
+    const height = baseImg.naturalHeight;
+    
+    // Create offscreen canvas
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    
+    // Draw base image
+    ctx.drawImage(baseImg, 0, 0);
+    
+    // Draw hair
+    if (hairImg.complete && hairImg.naturalWidth > 0) {
+      ctx.drawImage(hairImg, 0, 0);
+    }
+    
+    // Draw outfit
+    if (outfitImg.complete && outfitImg.naturalWidth > 0) {
+      ctx.drawImage(outfitImg, 0, 0);
+    }
+    
+    // Draw guitar (if selected)
+    if (guitarIdx !== null && guitarImg.complete && guitarImg.naturalWidth > 0 && guitarImg.src) {
+      ctx.drawImage(guitarImg, 0, 0);
+    }
+    
+    // Draw accessory (if selected)
+    if (accIdx !== null && accImg.complete && accImg.naturalWidth > 0 && accImg.src) {
+      ctx.drawImage(accImg, 0, 0);
+    }
+    
+    // Add bottom-right signature watermark (clear but tasteful)
+    ctx.save();
+    ctx.globalAlpha = 0.55;
+    ctx.fillStyle = "#000000";
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 3;
+    ctx.lineJoin = "round";
+    ctx.miterLimit = 2;
+    
+    const signatureText = "© Aowu_x";
+    const signatureSize = Math.max(18, Math.min(32, width / 25));
+    const signaturePadding = Math.max(16, Math.min(24, width / 30));
+    ctx.font = `${signatureSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif`;
+    ctx.textAlign = "right";
+    ctx.textBaseline = "bottom";
+    
+    const textX = width - signaturePadding;
+    const textY = height - signaturePadding;
+    
+    // Draw white stroke for readability
+    ctx.strokeText(signatureText, textX, textY);
+    // Draw black text
+    ctx.fillText(signatureText, textX, textY);
+    ctx.restore();
+    
+    // Export as PNG
+    canvas.toBlob(function(blob) {
+      if (blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "miracle-jisok.png";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        // Show success status and re-enable buttons
+        showExportStatus("Saved!", "success");
+        exportBtn.disabled = false;
+        if (mobileExportBtn) {
+          mobileExportBtn.disabled = false;
+        }
+      } else {
+        // Fallback to toDataURL
+        const dataURL = canvas.toDataURL("image/png");
+        const a = document.createElement("a");
+        a.href = dataURL;
+        a.download = "miracle-jisok.png";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        // Show success status and re-enable buttons
+        showExportStatus("Saved!", "success");
+        exportBtn.disabled = false;
+        if (mobileExportBtn) {
+          mobileExportBtn.disabled = false;
+        }
+      }
+    }, "image/png");
+    
+  } catch (error) {
+    console.error("Export error:", error);
+    showExportStatus("Export failed. Please try again.", "error");
+    exportBtn.disabled = false;
+    if (mobileExportBtn) {
+      mobileExportBtn.disabled = false;
+    }
+  }
 }
