@@ -39,11 +39,10 @@ const outfitPageInfo = document.getElementById("outfitPageInfo");
 // Get back to top button
 const backToTopBtn = document.getElementById("backToTop");
 
-// Get export buttons and status elements
+// Get export buttons and toast element
 const exportBtn = document.getElementById("exportBtn");
 const mobileExportBtn = document.getElementById("mobileExportBtn");
-const exportStatus = document.getElementById("exportStatus");
-const mobileExportStatus = document.getElementById("mobileExportStatus");
+const exportToast = document.getElementById("exportToast");
 
 // Get modal elements (will be initialized in setupModal)
 let aboutBtn;
@@ -420,26 +419,19 @@ function showExportStatus(message, type = "info") {
     clearTimeout(statusTimeout);
   }
   
-  // Update desktop status
-  if (exportStatus) {
-    exportStatus.textContent = message;
-    exportStatus.className = "export-status show";
+  // Update toast
+  if (exportToast) {
+    exportToast.textContent = message;
+    exportToast.className = "export-toast";
     if (type === "success") {
-      exportStatus.classList.add("success");
+      exportToast.classList.add("success");
     } else if (type === "error") {
-      exportStatus.classList.add("error");
+      exportToast.classList.add("error");
     }
-  }
-  
-  // Update mobile status
-  if (mobileExportStatus) {
-    mobileExportStatus.textContent = message;
-    mobileExportStatus.className = "mobile-export-status";
-    if (type === "success") {
-      mobileExportStatus.classList.add("success");
-    } else if (type === "error") {
-      mobileExportStatus.classList.add("error");
-    }
+    // Trigger show animation
+    setTimeout(() => {
+      exportToast.classList.add("show");
+    }, 10);
   }
   
   // Auto-hide after 2 seconds
@@ -449,17 +441,12 @@ function showExportStatus(message, type = "info") {
 }
 
 function hideExportStatus() {
-  if (exportStatus) {
-    exportStatus.classList.remove("show");
+  if (exportToast) {
+    exportToast.classList.remove("show");
     setTimeout(() => {
-      exportStatus.textContent = "";
-      exportStatus.className = "export-status";
+      exportToast.textContent = "";
+      exportToast.className = "export-toast";
     }, 300);
-  }
-  
-  if (mobileExportStatus) {
-    mobileExportStatus.textContent = "";
-    mobileExportStatus.className = "mobile-export-status";
   }
   
   if (statusTimeout) {

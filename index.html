@@ -17,8 +17,10 @@
         <span class="creator-id">@Aowu_x</span>
       </div>
     </div>
-    <div id="exportStatus" class="export-status" aria-live="polite" aria-atomic="true"></div>
   </header>
+
+  <!-- Toast Notification -->
+  <div id="exportToast" class="export-toast" aria-live="polite" aria-atomic="true"></div>
 
   <main class="main-content">
     <div class="app-layout">
@@ -32,6 +34,9 @@
             <img id="acc" alt="Accessory" />
             <div class="canvas-watermark">© Aowu_x</div>
           </div>
+        </div>
+        <div class="mobile-export-container">
+          <button id="mobileExportBtn" class="btn-primary mobile-export-btn" aria-label="Export PNG">Export PNG</button>
         </div>
       </div>
 
@@ -89,14 +94,6 @@
         
         <p>If unauthorized commercial use is found, public access to this game may be discontinued.</p>
       </div>
-    </div>
-  </div>
-
-  <!-- Mobile Export Action Bar -->
-  <div id="mobileExportBar" class="mobile-export-bar">
-    <div class="mobile-export-content">
-      <div id="mobileExportStatus" class="mobile-export-status" aria-live="polite" aria-atomic="true"></div>
-      <button id="mobileExportBtn" class="mobile-export-btn" aria-label="Export PNG">Export PNG</button>
     </div>
   </div>
 
