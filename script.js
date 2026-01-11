@@ -526,18 +526,37 @@ async function handleExport() {
     
     const signatureText = "© Aowu_x";
     const signatureSize = Math.max(18, Math.min(32, width / 25));
-    const signaturePadding = Math.max(16, Math.min(24, width / 30));
     ctx.font = `${signatureSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif`;
     ctx.textAlign = "right";
     ctx.textBaseline = "bottom";
     
-    const textX = width - signaturePadding;
-    const textY = height - signaturePadding;
+    // Calculate text width to ensure proper positioning
+    const textMetrics = ctx.measureText(signatureText);
+    const textWidth = textMetrics.width;
+    
+    // Position watermark with 6-8% offset from edges (using 7% as middle value)
+    const offsetX = width * 0.07;
+    const offsetY = height * 0.07;
+    
+    // Calculate position: ensure watermark stays within canvas bounds
+    // textAlign is "right", so textX is the right edge of the text
+    // We want the text to be offsetX pixels from the right edge
+    const textX = width - offsetX;
+    // Ensure text doesn't go outside left boundary
+    const minX = textWidth;
+    const finalX = Math.max(minX, textX);
+    
+    // textBaseline is "bottom", so textY is the bottom edge of the text
+    // We want the text to be offsetY pixels from the bottom edge
+    const textY = height - offsetY;
+    // Ensure text doesn't go outside top boundary
+    const minY = signatureSize;
+    const finalY = Math.max(minY, textY);
     
     // Draw white stroke for readability
-    ctx.strokeText(signatureText, textX, textY);
+    ctx.strokeText(signatureText, finalX, finalY);
     // Draw black text
-    ctx.fillText(signatureText, textX, textY);
+    ctx.fillText(signatureText, finalX, finalY);
     ctx.restore();
     
     // Export as PNG

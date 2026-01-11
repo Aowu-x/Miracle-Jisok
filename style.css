@@ -1068,3 +1068,10 @@ body {
     gap: 10px;
   }
 }
+
+/* Hide mobile export button on desktop */
+@media (min-width: 769px) {
+  .mobile-export-container {
+    display: none;
+  }
+}
